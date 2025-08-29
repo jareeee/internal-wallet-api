@@ -100,11 +100,12 @@ All endpoints are versioned under `/v1`. Here is a summary of the main endpoints
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `POST` | `/auth` | Sign in a user. |
-| `DELETE` | `/auth` | Sign out the current user. |
-| `GET` | `/wallets/:id` | Get details for a specific wallet. |
-| `GET` | `/users/:user_id/wallets`| Get all wallets for a user. |
-| `POST` | `/wallet/deposits` | Create a deposit transaction. |
-| `POST` | `/wallet/withdrawals`| Create a withdrawal transaction. |
-| `POST` | `/wallet/transfers` | Create a transfer between two wallets. |
-| `GET` | `/stock_prices` | Fetch stock prices from the external API. |
+| `POST` | `/v1/auth` | Sign in a user. |
+| `DELETE` | `/v1/auth` | Sign out the current user. |
+| `GET` | `/v1/wallets/:id` | Get details for a specific wallet. |
+| `GET` | `/v1/users/:user_id/wallets`| Get all wallets for a specific user. |
+| `GET` | `/v1/teams/:team_id/wallets`| Get all wallets for a specific team. |
+| `POST` | `/v1/wallet/deposits` | Create a deposit transaction. |
+| `POST` | `/v1/wallet/withdrawals`| Create a withdrawal transaction. |
+| `POST` | `/v1/wallet/transfers` | Create a transfer between two wallets. |
+| `GET` | `/v1/stock_prices` | Fetch stock prices from the external API. |
