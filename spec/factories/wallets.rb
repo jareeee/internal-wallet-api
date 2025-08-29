@@ -1,5 +1,5 @@
 FactoryBot.define do
   factory :wallet do
-    walletable { nil }
+    association :walletable, factory: :user
   end
 end

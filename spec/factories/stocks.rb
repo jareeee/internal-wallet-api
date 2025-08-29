@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :stock do
-    symbol { "MyString" }
-    user { nil }
+    symbol { "GOTO" }
+    association :user
   end
 end

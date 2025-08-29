@@ -10,4 +10,9 @@ Rails.application.routes.draw do
 
   post "/v1/auth", to: "v1/sessions#create"
   delete "/v1/auth", to: "v1/sessions#destroy"
+
+  namespace :v1 do
+    resources :wallets, only: [ :show ]
+    get "/wallets/by_owner", to: "wallets#by_owner"
+  end
 end
