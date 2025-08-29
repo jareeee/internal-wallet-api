@@ -13,7 +13,16 @@ Rails.application.routes.draw do
 
   namespace :v1 do
     get "/wallets/:id", to: "wallets#show"
-    get "/wallet/by_owner", to: "wallets#by_owner"
+
+    resources :users, only: [] do
+      resources :wallets, only: [ :index ]
+    end
+    resources :teams, only: [] do
+      resources :wallets, only: [ :index ]
+    end
+    resources :stocks, only: [] do
+      resources :wallets, only: [ :index ]
+    end
 
     # Transactions
     post "/wallet/deposits", to: "deposits#create"

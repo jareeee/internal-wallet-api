@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_29_073403) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_30_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_29_073403) do
     t.bigint "walletable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "currency", null: false
+    t.index ["walletable_id", "walletable_type", "currency"], name: "index_wallets_on_walletable_and_currency", unique: true
     t.index ["walletable_type", "walletable_id"], name: "index_wallets_on_walletable"
   end
 

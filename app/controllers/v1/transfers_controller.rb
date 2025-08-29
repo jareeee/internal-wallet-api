@@ -10,6 +10,7 @@ module V1
 
       unauthorized = false
       insufficient = false
+      cross_currency = false
       transfer = nil
 
       ActiveRecord::Base.transaction do
@@ -19,6 +20,11 @@ module V1
         target_wallet = locked[target_wallet_id.to_i]
 
         raise ActiveRecord::RecordNotFound unless source_wallet && target_wallet
+
+        if source_wallet.currency != target_wallet.currency
+          cross_currency = true
+          raise ActiveRecord::Rollback
+        end
 
         unless authorized_for_wallet?(source_wallet)
           unauthorized = true
@@ -42,6 +48,7 @@ module V1
 
       return render json: { error: "You are not authorized to transfer from this wallet" }, status: :forbidden if unauthorized
       return render json: { error: "Insufficient funds" }, status: :unprocessable_entity if insufficient
+      return render json: { error: "Cross-currency transfers are not supported" }, status: :unprocessable_entity if cross_currency
 
       render json: serialize_transaction(transfer), status: :created
     rescue ActiveRecord::RecordNotFound

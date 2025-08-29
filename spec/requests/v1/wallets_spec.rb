@@ -13,7 +13,7 @@ RSpec.describe "V1::Wallets", type: :request do
   describe "GET /v1/wallets/:id" do
     context "when user is logged in" do
       let!(:user) { create(:user) }
-      let!(:user_wallet) { user.create_wallet! }
+      let!(:user_wallet) { user.create_wallet!(currency: 'IDR') }
 
       before { login_as(user) }
 
@@ -25,14 +25,15 @@ RSpec.describe "V1::Wallets", type: :request do
         expect(body["data"]).to include(
           "id" => user_wallet.id,
           "owner_type" => "User",
-          "owner_id" => user.id
+          "owner_id" => user.id,
+          "currency" => "IDR"
         )
         expect(body["data"]).to have_key("balance")
       end
 
       it "returns 403 when accessing another user's wallet" do
         other = create(:user)
-        other_wallet = other.create_wallet!
+        other_wallet = other.create_wallet!(currency: 'IDR')
 
         get "/v1/wallets/#{other_wallet.id}", headers: headers
 
@@ -49,7 +50,7 @@ RSpec.describe "V1::Wallets", type: :request do
     context "when user is not logged in" do
       it "returns 401 unauthorized" do
         user = create(:user)
-        wallet = user.create_wallet!
+        wallet = user.create_wallet!(currency: 'IDR')
 
         get "/v1/wallets/#{wallet.id}", headers: headers
 
@@ -58,29 +59,25 @@ RSpec.describe "V1::Wallets", type: :request do
     end
   end
 
-  describe "GET /v1/wallets/by_owner" do
-    context "when team member is logged in" do
-      let!(:member) { create(:user) }
-      let!(:team) { create(:team) }
-      let!(:membership) { create(:team_membership, user: member, team: team, role: 'member') }
-      let!(:team_wallet) { team.create_wallet! }
+  describe "GET /v1/users/:user_id/wallets" do
+    let!(:user) { create(:user) }
+    let!(:wallet_idr) { user.create_wallet!(currency: 'IDR') }
+    let!(:wallet_usd) { user.create_wallet!(currency: 'USD') }
 
-      before { login_as(member) }
+    it "returns 401/403 when not logged in" do
+      get "/v1/users/#{user.id}/wallets", headers: headers
+      expect([ 401, 403 ]).to include(response.status)
+    end
 
-      it "returns team wallet for a member" do
-        get "/v1/wallet/by_owner", params: { owner_type: 'Team', owner_id: team.id }, headers: headers
+    it "returns list of wallets for the user when logged in" do
+      login_as(user)
+      get "/v1/users/#{user.id}/wallets", headers: headers
 
-        expect(response).to have_http_status(:ok)
-      end
-
-      it "returns 403 for non member" do
-        other = create(:user)
-        login_as(other)
-
-        get "/v1/wallet/by_owner", params: { owner_type: 'Team', owner_id: team.id }, headers: headers
-
-        expect(response).to have_http_status(:forbidden)
-      end
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["data"]).to be_an(Array)
+      currencies = body["data"].map { |w| w["currency"] }
+      expect(currencies).to match_array([ "IDR", "USD" ])
     end
   end
 end

@@ -16,7 +16,7 @@ RSpec.describe "V1::Transfers", type: :request do
 
   describe "POST /v1/wallet/transfers" do
     let!(:user) { create(:user) }
-    let!(:user_wallet) { user.create_wallet! }
+    let!(:user_wallet) { user.create_wallet!(currency: 'IDR') }
 
     context "when authenticated" do
       before do
@@ -24,8 +24,8 @@ RSpec.describe "V1::Transfers", type: :request do
         login_as(user)
       end
 
-      it "creates a transfer (201) when authorized and sufficient funds" do
-        target_wallet = create(:user).create_wallet!
+      it "creates a transfer (201) when authorized and sufficient funds (same currency)" do
+        target_wallet = create(:user).create_wallet!(currency: 'IDR')
 
         expect do
           post "/v1/wallet/transfers",
@@ -44,12 +44,12 @@ RSpec.describe "V1::Transfers", type: :request do
         )
       end
 
-      it "allows transfer from team wallet when user is a member" do
+      it "allows transfer from team wallet when user is a member (same currency)" do
         team = create(:team)
         create(:team_membership, team: team, user: user, role: 'member')
-        team_wallet = team.create_wallet!
+        team_wallet = team.create_wallet!(currency: 'IDR')
         seed_deposit(team_wallet, amount: 50)
-        target_wallet = create(:user).create_wallet!
+        target_wallet = create(:user).create_wallet!(currency: 'IDR')
 
         post "/v1/wallet/transfers",
              params: { source_wallet_id: team_wallet.id, target_wallet_id: target_wallet.id, amount: 25, currency: "IDR" }.to_json,
@@ -59,7 +59,7 @@ RSpec.describe "V1::Transfers", type: :request do
       end
 
       it "returns 403 when not authorized for source wallet" do
-        other_wallet = create(:user).create_wallet!
+        other_wallet = create(:user).create_wallet!(currency: 'IDR')
         seed_deposit(other_wallet, amount: 100)
 
         post "/v1/wallet/transfers",
@@ -82,7 +82,7 @@ RSpec.describe "V1::Transfers", type: :request do
       end
 
       it "returns 422 when amount is invalid (<= 0)" do
-        target_wallet = create(:user).create_wallet!
+        target_wallet = create(:user).create_wallet!(currency: 'IDR')
 
         post "/v1/wallet/transfers",
              params: { source_wallet_id: user_wallet.id, target_wallet_id: target_wallet.id, amount: 0, currency: "IDR" }.to_json,
@@ -92,7 +92,7 @@ RSpec.describe "V1::Transfers", type: :request do
       end
 
       it "returns 422 when funds are insufficient" do
-        target_wallet = create(:user).create_wallet!
+        target_wallet = create(:user).create_wallet!(currency: 'IDR')
 
         post "/v1/wallet/transfers",
              params: { source_wallet_id: user_wallet.id, target_wallet_id: target_wallet.id, amount: 999_999, currency: "IDR" }.to_json,
@@ -101,6 +101,18 @@ RSpec.describe "V1::Transfers", type: :request do
         expect(response).to have_http_status(:unprocessable_entity)
         body = JSON.parse(response.body)
         expect(body["error"]).to eq("Insufficient funds")
+      end
+
+      it "returns 422 for cross-currency transfer attempts" do
+        target_wallet = create(:user).create_wallet!(currency: 'USD')
+
+        post "/v1/wallet/transfers",
+             params: { source_wallet_id: user_wallet.id, target_wallet_id: target_wallet.id, amount: 10, currency: "IDR" }.to_json,
+             headers: headers
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        body = JSON.parse(response.body)
+        expect(body["error"]).to eq("Cross-currency transfers are not supported")
       end
     end
 

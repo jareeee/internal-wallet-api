@@ -17,7 +17,7 @@ RSpec.describe "V1::Deposits", type: :request do
       before { login_as(user) }
 
       it "creates a deposit (201) with valid payload" do
-        target = create(:user).create_wallet!
+        target = create(:user).create_wallet!(currency: 'IDR')
 
         expect do
           post "/v1/wallet/deposits",
@@ -44,7 +44,7 @@ RSpec.describe "V1::Deposits", type: :request do
       end
 
       it "returns 422 when amount is invalid (<= 0)" do
-        target = create(:user).create_wallet!
+        target = create(:user).create_wallet!(currency: 'IDR')
 
         post "/v1/wallet/deposits",
              params: { target_wallet_id: target.id, amount: 0, currency: "IDR" }.to_json,
@@ -56,7 +56,7 @@ RSpec.describe "V1::Deposits", type: :request do
 
     context "when unauthenticated" do
       it "returns 401/403" do
-        target = create(:user).create_wallet!
+        target = create(:user).create_wallet!(currency: 'IDR')
 
         post "/v1/wallet/deposits",
              params: { target_wallet_id: target.id, amount: 10, currency: "IDR" }.to_json,

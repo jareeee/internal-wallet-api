@@ -16,7 +16,7 @@ RSpec.describe "V1::Withdrawals", type: :request do
 
   describe "POST /v1/wallet/withdrawals" do
     let!(:user) { create(:user) }
-    let!(:user_wallet) { user.create_wallet! }
+    let!(:user_wallet) { user.create_wallet!(currency: 'IDR') }
 
     context "when authenticated" do
       before do
@@ -43,7 +43,7 @@ RSpec.describe "V1::Withdrawals", type: :request do
 
       it "returns 403 when user is not authorized for the source wallet" do
         other = create(:user)
-        other_wallet = other.create_wallet!
+  other_wallet = other.create_wallet!(currency: 'IDR')
         seed_deposit(other_wallet, amount: 100)
 
         post "/v1/wallet/withdrawals",

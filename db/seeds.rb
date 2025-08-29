@@ -29,9 +29,9 @@ ActiveRecord::Base.transaction do
   stock = Stock.create!(symbol: "GOTO", user: main_user)
 
   puts "Creating wallets..."
-  main_user.create_wallet!
-  team.create_wallet!
-  stock.create_wallet!
+  main_user.create_wallet!(currency: 'IDR')
+  team.create_wallet!(currency: 'IDR')
+  stock.create_wallet!(currency: 'IDR')
 
   puts "Seeding done."
   puts "Login with: email=main@example.com password=password123"

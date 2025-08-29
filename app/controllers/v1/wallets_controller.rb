@@ -11,16 +11,16 @@ module V1
       render json: serialize_wallet(wallet), status: :ok
     end
 
-    def by_owner
-      owner_type = params[:owner_type]
-      owner_id = params[:owner_id]
+    def index
+      owner = find_owner_from_params
+      return render json: { error: "Owner not found" }, status: :not_found unless owner
 
-      wallet = Wallet.find_by(walletable_type: owner_type, walletable_id: owner_id)
+      unless owner.respond_to?(:wallet_accessible_by?) && owner.wallet_accessible_by?(current_user)
+        return render json: { error: "You are not authorized to view these wallets" }, status: :forbidden
+      end
 
-      return render json: { error: "Wallet not found" }, status: :not_found unless wallet
-      return render json: { error: "You are not authorized to view this wallet" }, status: :forbidden unless authorized_for_wallet?(wallet)
-
-      render json: serialize_wallet(wallet), status: :ok
+      wallets = owner.wallets
+      render json: serialize_wallets(wallets), status: :ok
     end
 
     private
@@ -38,9 +38,26 @@ module V1
           id: wallet.id,
           owner_type: wallet.walletable_type,
           owner_id: wallet.walletable_id,
+          currency: wallet.currency,
           balance: wallet.calculate_balance.to_s
         }
       }
+    end
+
+    def serialize_wallets(wallets)
+      {
+        data: wallets.map { |w| serialize_wallet(w)[:data] }
+      }
+    end
+
+    def find_owner_from_params
+      if params[:user_id]
+        User.find_by(id: params[:user_id])
+      elsif params[:team_id]
+        Team.find_by(id: params[:team_id])
+      elsif params[:stock_id]
+        Stock.find_by(id: params[:stock_id])
+      end
     end
   end
 end
