@@ -14,5 +14,10 @@ Rails.application.routes.draw do
   namespace :v1 do
     get "/wallets/:id", to: "wallets#show"
     get "/wallet/by_owner", to: "wallets#by_owner"
+
+    # Transactions
+    post "/wallet/deposits", to: "deposits#create"
+    post "/wallet/withdrawals", to: "withdrawals#create"
+    post "/wallet/transfers", to: "transfers#create"
   end
 end
