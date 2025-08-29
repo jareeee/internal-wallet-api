@@ -18,16 +18,16 @@ module LatestStockPrice
     end
 
     def price(indices)
-      self.class.get("/price", query: { Indices: indices }, **@options)
+      HTTParty.get("#{self.class.base_uri}/price", query: { Indices: indices }, **@options)
     end
 
     def prices(indices_list)
       indices_param = indices_list.is_a?(Array) ? indices_list.join(",") : indices_list.to_s
-      self.class.get("/prices", query: { Indices: indices_param }, **@options)
+      HTTParty.get("#{self.class.base_uri}/prices", query: { Indices: indices_param }, **@options)
     end
 
     def price_all
-      self.class.get("/price_all", **@options)
+      HTTParty.get("#{self.class.base_uri}/price_all", **@options)
     end
 
     private
