@@ -50,6 +50,9 @@ group :development, :test do
   gem "faker"
   gem "shoulda-matchers"
   gem "database_cleaner-active_record"
+
+  gem "pry-rails"
+  gem "pry-byebug" 
 end
 
 gem "sidekiq"

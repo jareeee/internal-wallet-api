@@ -3,40 +3,33 @@ module V1
     before_action :authorize_request
 
     def show
-      @wallet = Wallet.find_by(id: params[:id])
+      wallet = Wallet.find_by(id: params[:id])
 
-      return render json: { error: "Wallet not found" }, status: :not_found unless @wallet
-      return render json: { error: "You are not authorized to view this wallet" }, status: :forbidden unless authorized_for_wallet?(@wallet)
+      return render json: { error: "Wallet not found" }, status: :not_found unless wallet
+      return render json: { error: "You are not authorized to view this wallet" }, status: :forbidden unless authorized_for_wallet?(wallet)
 
-      render json: serialize_wallet(@wallet), status: :ok
+      render json: serialize_wallet(wallet), status: :ok
     end
 
     def by_owner
       owner_type = params[:owner_type]
       owner_id = params[:owner_id]
 
-      @wallet = Wallet.find_by(walletable_type: owner_type, walletable_id: owner_id)
+      wallet = Wallet.find_by(walletable_type: owner_type, walletable_id: owner_id)
 
-      return render json: { error: "Wallet not found" }, status: :not_found unless @wallet
-      return render json: { error: "You are not authorized to view this wallet" }, status: :forbidden unless authorized_for_wallet?(@wallet)
+      return render json: { error: "Wallet not found" }, status: :not_found unless wallet
+      return render json: { error: "You are not authorized to view this wallet" }, status: :forbidden unless authorized_for_wallet?(wallet)
 
-      render json: serialize_wallet(@wallet), status: :ok
+      render json: serialize_wallet(wallet), status: :ok
     end
 
     private
 
     def authorized_for_wallet?(wallet)
       owner = wallet.walletable
-      case owner
-      when User
-        owner == current_user
-      when Team
-        owner.members.include?(current_user)
-      when Stock
-        owner.user == current_user
-      else
-        false
-      end
+      return false unless owner.respond_to?(:wallet_accessible_by?)
+
+      owner.wallet_accessible_by?(current_user)
     end
 
     def serialize_wallet(wallet)

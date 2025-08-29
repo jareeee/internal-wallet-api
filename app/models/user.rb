@@ -10,4 +10,8 @@ class User < ApplicationRecord
   validates :email, presence: true,
                     uniqueness: true,
                     format: { with: URI::MailTo::EMAIL_REGEXP }
+
+  def wallet_accessible_by?(user)
+    self == user
+  end
 end
