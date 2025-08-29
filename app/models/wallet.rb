@@ -1,12 +1,10 @@
 class Wallet < ApplicationRecord
   belongs_to :walletable, polymorphic: true
 
-  # Associations
   has_many :balance_snapshots, dependent: :destroy
   has_many :outgoing_transactions, class_name: "Transaction", foreign_key: "source_wallet_id", dependent: :destroy
   has_many :incoming_transactions, class_name: "Transaction", foreign_key: "target_wallet_id", dependent: :destroy
 
-  # Calculate balance based on last snapshot and subsequent transactions
   def calculate_balance
     last_snapshot = balance_snapshots.order(snapshot_date: :desc, created_at: :desc).first
 

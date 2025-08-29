@@ -1,6 +1,5 @@
 module V1
   class SessionsController < ApplicationController
-    # POST /v1/auth
     def create
       user = User.find_by(email: params[:email])
 
@@ -24,7 +23,6 @@ module V1
       end
     end
 
-    # DELETE /v1/auth
     def destroy
       session.delete(:user_id)
       render json: { message: "Logout successful" }
