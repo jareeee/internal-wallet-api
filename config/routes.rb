@@ -7,4 +7,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  post "/v1/auth", to: "v1/sessions#create"
+  delete "/v1/auth", to: "v1/sessions#destroy"
 end
