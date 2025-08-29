@@ -19,5 +19,8 @@ Rails.application.routes.draw do
     post "/wallet/deposits", to: "deposits#create"
     post "/wallet/withdrawals", to: "withdrawals#create"
     post "/wallet/transfers", to: "transfers#create"
+
+    # External stock prices
+    get "/stock_prices", to: "stock_prices#index"
   end
 end
